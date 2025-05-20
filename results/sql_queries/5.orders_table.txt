@@ -1,0 +1,36 @@
+Задача 5.
+
+CREATE TABLE orders (
+    order_id SERIAL PRIMARY KEY,
+    customer_id INT NOT NULL,
+    product_id INT NOT NULL,
+    quantity INT NOT NULL CHECK (quantity > 0),
+    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+--Проблемный запрос
+SELECT *
+FROM orders
+WHERE order_date >= CURRENT_DATE - INTERVAL '1 month';
+
+1) Какие индексы могут улучшить выполнение запроса?
+
+Стандартный b-tree индекс по столбцу с датами улучшит время выполнения 
+CREATE INDEX idx_orders_order_date ON orders(order_date);
+
+2) Как можно проверить, что индекс действительно улучшил производительность?
+
+Посмотреть время выполнения в explain analyze до и после добавления индекса
+EXPLAIN ANALYZE
+SELECT *
+FROM orders
+WHERE order_date >= CURRENT_DATE - INTERVAL '1 month';
+
+3) Как влияет VACUUM ANALYZE на производительность этого запроса?
+
+Обновляет статистические данные о таблице, что положительно влияет на скорость выполнения запроса
+
+4) Какими ещё способами можно оптимизировать выполнение запросов к этой таблице?
+
+-В select выводить только нужные в конкретном запросе поля, без оператора *.
+-Увеличить параметры work_mem и effective_cache_size, чтобы БД эффективнее работала с большим объемом данных
